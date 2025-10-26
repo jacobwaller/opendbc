@@ -166,7 +166,6 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
     .angle_deg_to_can = 100.,
     // FIXME: max_angle_rate from tesla
     .frequency = 50U,
-    },
   };
 
   // CarSpecs values for 2025 Crosstrek
