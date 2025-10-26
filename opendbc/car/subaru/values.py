@@ -72,8 +72,6 @@ class CarControllerParams:
     MAX_ANGLE_RATE=5,  # deg/20ms frame
   )
 
-
-
 class SubaruSafetyFlags(IntFlag):
   GEN2 = 1
   LONG = 2

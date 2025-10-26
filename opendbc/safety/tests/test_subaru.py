@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import enum
 import unittest
+import numpy as np
 
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
 from opendbc.car.subaru.values import SubaruSafetyFlags, CarControllerParams, CAR
