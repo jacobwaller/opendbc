@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds, ACCELERATION_DUE_TO_GRAVITY
-from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL, AVERAGE_ROAD_ROLL
+from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -52,6 +52,8 @@ class CarControllerParams:
 
   BRAKE_LOOKUP_BP = [-3.5, 0]
   BRAKE_LOOKUP_V = [BRAKE_MAX, BRAKE_MIN]
+
+  AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation.
 
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
     100,
