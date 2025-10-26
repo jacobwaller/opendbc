@@ -5,7 +5,6 @@ import unittest
 from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm
 from opendbc.car.subaru.values import SubaruSafetyFlags, CarControllerParams, CAR
 from opendbc.car.subaru.interface import CarInterface
-from opendbc.car.honda.values import CAR
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.safety.tests.libsafety import libsafety_py
