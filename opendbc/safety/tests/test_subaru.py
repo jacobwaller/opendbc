@@ -9,7 +9,7 @@ from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety
+from opendbc.safety.tests.common import CANPackerSafety, away_round, round_speed
 from functools import partial
 
 
@@ -61,6 +61,11 @@ def gen2_long_additional_tx_msgs():
 def fwd_blacklisted_addr(lkas_msg=SubaruMsg.ES_LKAS):
   return {SUBARU_CAM_BUS: [lkas_msg, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State, SubaruMsg.ES_Infotainment]}
 
+def round_angle(apply_angle, can_offset=0):
+  apply_angle_can = (apply_angle + 1638.35) / 0.1 + can_offset
+  # 0.49999_ == 0.5
+  rnd_offset = 1e-5 if apply_angle >= 0 else -1e-5
+  return away_round(apply_angle_can + rnd_offset) * 0.1 - 1638.35
 
 class TestSubaruSafetyBase(common.CarSafetyTest):
   FLAGS = 0
