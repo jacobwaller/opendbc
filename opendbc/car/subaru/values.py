@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds, ACCELERATION_DUE_TO_GRAVITY
+from opendbc.car.lateral import AngleSteeringLimits, ISO_LATERAL_ACCEL, AVERAGE_ROAD_ROLL
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -51,6 +52,24 @@ class CarControllerParams:
 
   BRAKE_LOOKUP_BP = [-3.5, 0]
   BRAKE_LOOKUP_V = [BRAKE_MAX, BRAKE_MIN]
+
+  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+    100,
+    # v1 limits, not used
+    ([], []),
+    ([], []),
+
+    # Vehicle model angle limits
+    # Add extra tolerance for average banked road since safety doesn't have the roll
+    MAX_LATERAL_ACCEL=ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^2
+    MAX_LATERAL_JERK=3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^3
+
+    # limit angle rate to both prevent a fault and for low speed comfort (~12 mph rate down to 0 mph)
+    # FIXME: convert from carcontroller known limit
+    # MAX_STEER_RATE = 25  # deg/s
+    MAX_ANGLE_RATE=5,  # deg/20ms frame
+  )
+
 
 
 class SubaruSafetyFlags(IntFlag):

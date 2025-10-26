@@ -164,14 +164,18 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
   const AngleSteeringLimits SUBARU_ANGLE_STEERING_LIMITS = {
     .max_angle = 545*100,
     .angle_deg_to_can = 100.,
-    .angle_rate_up_lookup = {
-      {0.0, 5.0, 15.0},
-      {5.0, 0.8, 0.15}
+    // FIXME: max_angle_rate from tesla
+    .frequency = 50U,
     },
-    .angle_rate_down_lookup = {
-      {0.0, 5.0, 15.0},
-      {5.0, 0.4, 0.15}
-    },
+  };
+
+  // CarSpecs values for 2025 Crosstrek
+  // FIXME: add values for all 4 supported angle based models
+  const AngleSteeringParams SUBARU_ANGLE_STEERING_PARAMS = {
+    // FIXME: tesla value, find out how to calculate for 2025 Crosstrek
+    .slip_factor = -0.000580374383851451,  // calc_slip_factor(VM)
+    .steer_ratio = 13.5,
+    .wheelbase = 2.5781,
   };
 
   const LongitudinalLimits SUBARU_LONG_LIMITS = {
@@ -203,7 +207,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
     desired_angle = -1 * to_signed(desired_angle, 17);
     bool lkas_request = GET_BIT(msg, 12U);
     
-    violation |= steer_angle_cmd_checks(desired_angle, lkas_request, SUBARU_ANGLE_STEERING_LIMITS);
+    violation |= steer_angle_cmd_checks_vm(desired_angle, lkas_request, SUBARU_ANGLE_STEERING_LIMITS, SUBARU_ANGLE_STEERING_PARAMS);
   }
 
   // check es_brake brake_pressure limits
