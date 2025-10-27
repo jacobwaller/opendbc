@@ -1,14 +1,15 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
-from opendbc.car.lateral import AngleSteeringLimits, make_limits_slightly_more_restrictive
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car.lateral import ISO_LATERAL_ACCEL, AngleSteeringLimits
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 
 Ecu = CarParams.Ecu
 
+AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
 
 class CarControllerParams:
   def __init__(self, CP):
@@ -19,13 +20,14 @@ class CarControllerParams:
     self.STEER_DRIVER_MULTIPLIER = 50  # weight driver torque heavily
     self.STEER_DRIVER_FACTOR = 1       # from dbc
 
-    unrestricted_angle_limits: AngleSteeringLimits = AngleSteeringLimits(
-        100,
-        ([0., 5., 35.], [5., .8, .15,]),
-        ([0., 5., 35.], [5., .8, .15,]),
+    self.ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+        545,
+        ([],[]),
+        ([],[]),
+        MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^2
+        MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL),  # ~3.6 m/s^3
+        MAX_ANGLE_RATE = 5.0
     )
-
-    self.ANGLE_LIMITS = make_limits_slightly_more_restrictive(unrestricted_angle_limits)
 
     if CP.flags & SubaruFlags.GLOBAL_GEN2:
       # TODO: lower rate limits, this reaches min/max in 0.5s which negatively affects tuning
@@ -223,7 +225,7 @@ class CAR(Platforms):
   )
   SUBARU_CROSSTREK_2025 = SubaruGen2PlatformConfig(
     [SubaruCarDocs("Subaru Crosstrek 2025", "All", car_parts=CarParts.common([CarHarness.subaru_d]))],
-    CarSpecs(mass=1529, wheelbase=2.5781, steerRatio=13.5),
+    CarSpecs(mass=1529, wheelbase=2.5781, steerRatio=13),
     flags=SubaruFlags.LKAS_ANGLE
   )
 
