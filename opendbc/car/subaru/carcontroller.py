@@ -5,6 +5,7 @@ from opendbc.car.lateral import apply_driver_steer_torque_limits, apply_steer_an
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
 from opendbc.car.subaru.values import DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
+from opendbc.car.vehicle_model import VehicleModel
 
 # FIXME: These limits aren't exact. The real limit is more than likely over a larger time period and
 # involves the total steering angle change rather than rate, but these limits work well for now
@@ -22,6 +23,9 @@ class CarController(CarControllerBase):
 
     self.p = CarControllerParams(CP)
     self.packer = CANPacker(DBC[CP.carFingerprint][Bus.pt])
+
+    # Vehicle model used for lateral limiting
+    self.VM = VehicleModel(CP)
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -42,7 +46,8 @@ class CarController(CarControllerBase):
           CS.out.vEgoRaw,
           actual_steering_angle_deg,
           CC.latActive,
-          self.p
+          self.p,
+          self.VM
         )
 
         if not CC.latActive:
