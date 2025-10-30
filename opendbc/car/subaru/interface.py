@@ -93,9 +93,9 @@ class CarInterface(CarInterfaceBase):
     else:
       raise ValueError(f"unknown car: {candidate}")
 
-    ret.alphaLongitudinalAvailable = True #SubaruFlags.LKAS_ANGLE or not (ret.flags & (SubaruFlags.GLOBAL_GEN2 | SubaruFlags.PREGLOBAL |
-                                           #             SubaruFlags.HYBRID))
-    ret.openpilotLongitudinalControl = True # alpha_long and ret.alphaLongitudinalAvailable
+    ret.alphaLongitudinalAvailable = not (ret.flags & (SubaruFlags.GLOBAL_GEN2 | SubaruFlags.PREGLOBAL | SubaruFlags.LKAS_ANGLE |
+                                                        SubaruFlags.HYBRID))
+    ret.openpilotLongitudinalControl = alpha_long
 
     if ret.flags & SubaruFlags.GLOBAL_GEN2 and ret.openpilotLongitudinalControl:
       ret.flags |= SubaruFlags.DISABLE_EYESIGHT.value
