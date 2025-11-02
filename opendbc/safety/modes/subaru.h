@@ -291,17 +291,17 @@ static safety_config subaru_init(uint16_t param) {
   static RxCheck subaru_gen2_rx_checks[] = {
     SUBARU_COMMON_RX_CHECKS(SUBARU_ALT_BUS)
   };
-
+  
   static RxCheck subaru_lkas_angle_rx_checks[] = {
     SUBARU_LKAS_ANGLE_RX_CHECKS(SUBARU_ALT_BUS)
   };
-
+  
   const uint16_t SUBARU_PARAM_GEN2 = 1;
-  const uint16_t SUBARU_PARAM_LKAS_ANGLE = 8;
-
   subaru_gen2 = GET_FLAG(param, SUBARU_PARAM_GEN2);
-  subaru_lkas_angle = GET_FLAG(param, SUBARU_PARAM_LKAS_ANGLE);
 
+  const uint16_t SUBARU_PARAM_LKAS_ANGLE = 8;
+  subaru_lkas_angle = GET_FLAG(param, SUBARU_PARAM_LKAS_ANGLE);
+  
   const uint16_t SUBARU_PARAM_LONGITUDINAL = 2;
   subaru_longitudinal = GET_FLAG(param, SUBARU_PARAM_LONGITUDINAL);
 
@@ -314,7 +314,7 @@ static safety_config subaru_init(uint16_t param) {
                                 BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_TX_MSGS);
   } else {
     ret = subaru_longitudinal ? BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_LONG_TX_MSGS) : \
-                                BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_TX_MSGS);
+    BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_TX_MSGS);
   }
   return ret;
 }
