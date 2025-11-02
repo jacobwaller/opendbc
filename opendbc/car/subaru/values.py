@@ -22,7 +22,7 @@ class CarControllerParams:
     self.ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
         545,
         ([0., 5., 35.], [5., .8, .15,]),
-        ([0., 9., 15., 35.], [10., 10., .8, .15,]),
+        ([9., 15., 35.], [10., .8, .15,]),
     )
 
     if CP.flags & SubaruFlags.GLOBAL_GEN2:
