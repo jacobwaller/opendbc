@@ -68,7 +68,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.SUBARU_CROSSTREK_HYBRID:
       ret.steerActuatorDelay = 0.1
 
-    elif candidate == CAR.SUBARU_CROSSTREK_2025:
+    elif candidate == CAR.SUBARU_CROSSTREK_2025 or candidate == CAR.SUBARU_CROSSTREK_2024:
       ret.dashcamOnly = False
       ret.steerActuatorDelay = 0.3
 
