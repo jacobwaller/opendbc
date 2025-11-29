@@ -1,15 +1,21 @@
 import numpy as np
 from opendbc.can import CANPacker
 from opendbc.car import Bus, make_tester_present_msg
-from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance, apply_std_steer_angle_limits
+from opendbc.car.lateral import apply_driver_steer_torque_limits, apply_steer_angle_limits_vm, common_fault_avoidance
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
 from opendbc.car.subaru.values import DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
+from opendbc.car.vehicle_model import VehicleModel
 
 # FIXME: These limits aren't exact. The real limit is more than likely over a larger time period and
 # involves the total steering angle change rather than rate, but these limits work well for now
 MAX_STEER_RATE = 25  # deg/s
 MAX_STEER_RATE_FRAMES = 7  # tx control frames needed before torque can be cut
+
+ANGLE_SAFETY_BASELINE_MODEL = "SUBARU_ASCENT_2023" # Heaviest angle based platform, so we are the most restrictive for safety
+def get_baseline_safety_cp():
+  from opendbc.car.hyundai.interface import CarInterface
+  return CarInterface.get_non_essential_params(ANGLE_SAFETY_BASELINE_MODEL)
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
@@ -22,6 +28,9 @@ class CarController(CarControllerBase):
 
     self.p = CarControllerParams(CP)
     self.packer = CANPacker(DBC[CP.carFingerprint][Bus.pt])
+
+    self.VM = VehicleModel(CP)
+    self.BASELINE_VM = VehicleModel(get_baseline_safety_cp())
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -36,14 +45,27 @@ class CarController(CarControllerBase):
         actual_steering_angle_deg = CS.out.steeringAngleDeg
         desired_steering_angle_deg = actuators.steeringAngleDeg
 
-        apply_steer = apply_std_steer_angle_limits(
+        # Always send the baseline angle limits for safety
+        # This allows us to ensure that we are sending the most restrictive limits
+        # which is what we do in subaru.h as well.
+        apply_steer = apply_steer_angle_limits_vm(
           desired_steering_angle_deg,
           self.apply_steer_last,
           CS.out.vEgoRaw,
           actual_steering_angle_deg,
           CC.latActive,
-          self.p.ANGLE_LIMITS
+          self.p,
+          self.BASELINE_VM
         )
+
+        # apply_steer = apply_std_steer_angle_limits(
+        #   desired_steering_angle_deg,
+        #   self.apply_steer_last,
+        #   CS.out.vEgoRaw,
+        #   actual_steering_angle_deg,
+        #   CC.latActive,
+        #   self.p.ANGLE_LIMITS
+        # )
 
         if not CC.latActive:
           apply_steer = actual_steering_angle_deg

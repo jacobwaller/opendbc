@@ -39,6 +39,11 @@ def make_msg(bus, addr, length=8, dat=None):
     dat = b'\x00' * length
   return libsafety_py.make_CANPacket(addr, bus, dat)
 
+def round_angle(apply_angle, can_offset=0):
+  apply_angle_can = (apply_angle + 1638.35) / 0.1 + can_offset
+  # 0.49999_ == 0.5
+  rnd_offset = 1e-5 if apply_angle >= 0 else -1e-5
+  return away_round(apply_angle_can + rnd_offset) * 0.1 - 1638.35
 
 class CANPackerSafety(CANPacker):
   def make_can_msg_safety(self, name_or_addr, bus, values, fix_checksum=None):

@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
-from opendbc.car.lateral import AngleSteeringLimits
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, AVERAGE_ROAD_ROLL, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car.lateral import ISO_LATERAL_ACCEL, AngleSteeringLimits
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -20,9 +20,14 @@ class CarControllerParams:
     self.STEER_DRIVER_FACTOR = 1       # from dbc
 
     self.ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-        545,
-        ([0., 5., 35.], [5., .8, .15,]),
-        ([0., 5., 35.], [5., .8, .15,]),
+      # Steering angle limits based on observed stock ADAS behavior:
+      # - 2025 Crosstrek LKAS Seems to fault >200°, so we use 190° as a safe limit.
+      190,  # degrees (safe upper bound for command, allowing some margin)
+      ([], []),
+      ([], []),
+      MAX_LATERAL_ACCEL=(ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)),  # ~3.6 m/s^2
+      MAX_LATERAL_JERK=(3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)),  # ~3.6 m/s^3,
+      MAX_ANGLE_RATE=5  # comfort rate limit for angle commands, in degrees per frame.
     )
 
     if CP.flags & SubaruFlags.GLOBAL_GEN2:

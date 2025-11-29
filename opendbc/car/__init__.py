@@ -15,6 +15,8 @@ STD_CARGO_KG = 136.
 
 ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
+AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll raises lateral acceleration
+
 ButtonType = structs.CarState.ButtonEvent.Type
 
 

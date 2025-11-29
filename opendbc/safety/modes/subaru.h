@@ -84,6 +84,13 @@ static bool subaru_gen2 = false;
 static bool subaru_longitudinal = false;
 static bool subaru_lkas_angle = false;
 
+
+
+
+
+
+
+
 static uint32_t subaru_get_checksum(const CANPacket_t *msg) {
   return (uint8_t)msg->data[0];
 }
@@ -163,7 +170,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits SUBARU_GEN2_STEERING_LIMITS = SUBARU_STEERING_LIMITS_GENERATOR(1000, 40, 40);
 
   const AngleSteeringLimits SUBARU_ANGLE_STEERING_LIMITS = {
-    .max_angle = 545*100,
+    .max_angle = 190*100,
     .angle_deg_to_can = 100.,
     .angle_rate_up_lookup = {
       {0.0, 5.0, 35.0},
@@ -173,6 +180,30 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
       {0.0, 5.0, 35.0},
       {5.0, 0.8, 0.15}
     },
+  };
+
+  /**
+   * If you are adding a port for a vehicle that isn't in this list, calculate
+   * the slip factor and if it would be more restrictive, set it to the
+   * value below. More restrictive means a value closer to zero and is typically
+   * a larger, heavier vehicle. 
+   * 
+   * (not angle based, but the 2023 uses the same specs)
+   * SUBARU_ASCENT = SubaruPlatformConfig(
+   *   [SubaruCarDocs("Subaru Ascent 2019-21", "All")],
+   *   CarSpecs(mass=2031, wheelbase=2.89, steerRatio=13.5),
+   * )
+   * 
+   * calc_slip_factor(VM)
+   * Ascent 2019-23       -0.000580374471400815
+   * Crosstrek 2024-2025  -0.0006505884722546708
+   * Forester 2022        -0.0006281956135115129
+   * Outback 2023         -0.0006281956135115129
+   */
+  const AngleSteeringParams SUBARU_STEERING_PARAMS = {
+    .slip_factor = -0.000580374471400815,
+    .steer_ratio = 13.5,
+    .wheelbase = 2.89,
   };
 
   const LongitudinalLimits SUBARU_LONG_LIMITS = {
@@ -203,8 +234,8 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
     int desired_angle = GET_BYTES(msg, 5, 3) & 0x1FFFFU;
     desired_angle = -1 * to_signed(desired_angle, 17);
     bool lkas_request = GET_BIT(msg, 12U);
-    
-    violation |= steer_angle_cmd_checks(desired_angle, lkas_request, SUBARU_ANGLE_STEERING_LIMITS);
+
+    violation |= steer_angle_cmd_checks_vm(desired_angle, lkas_request, SUBARU_ANGLE_STEERING_LIMITS, SUBARU_STEERING_PARAMS);
   }
 
   // check es_brake brake_pressure limits

@@ -11,18 +11,11 @@ from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerSafety, MAX_SPEED_DELTA, MAX_WRONG_COUNTERS, away_round, round_speed
+from opendbc.safety.tests.common import CANPackerSafety, MAX_SPEED_DELTA, MAX_WRONG_COUNTERS, away_round, round_angle, round_speed
 
 MSG_DAS_steeringControl = 0x488
 MSG_APS_eacMonitor = 0x27d
 MSG_DAS_Control = 0x2b9
-
-
-def round_angle(apply_angle, can_offset=0):
-  apply_angle_can = (apply_angle + 1638.35) / 0.1 + can_offset
-  # 0.49999_ == 0.5
-  rnd_offset = 1e-5 if apply_angle >= 0 else -1e-5
-  return away_round(apply_angle_can + rnd_offset) * 0.1 - 1638.35
 
 
 class TestTeslaSafetyBase(common.CarSafetyTest, common.AngleSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
