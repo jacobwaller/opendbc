@@ -41,6 +41,13 @@
 #define MSG_SUBARU_ES_STATIC_1           0x22aU
 #define MSG_SUBARU_ES_STATIC_2           0x325U
 
+// Redefined MSGs from above for Angle Based LKAS Subarus
+// (subaru_global_2017_generated)
+#define MSG_SUBARU_ANGLE_ES_HighBeamAssist  0x22AU
+#define MSG_SUBARU_ANGLE_ES_STATIC_1        0x325U
+#define MSG_SUBARU_ANGLE_ES_STATIC_2        0x121U
+
+
 #define SUBARU_MAIN_BUS 0U
 #define SUBARU_ALT_BUS  1U
 #define SUBARU_CAM_BUS  2U
@@ -64,6 +71,12 @@
   {MSG_SUBARU_ES_HighBeamAssist, SUBARU_MAIN_BUS, 8, .check_relay = false}, \
   {MSG_SUBARU_ES_STATIC_1,       SUBARU_MAIN_BUS, 8, .check_relay = false}, \
   {MSG_SUBARU_ES_STATIC_2,       SUBARU_MAIN_BUS, 8, .check_relay = false}, \
+
+#define SUBARU_ANGLE_LKAS_LONG_ADDITIONAL_TX_MSGS() \
+  {MSG_SUBARU_ES_UDS_Request,          SUBARU_CAM_BUS,  8, .check_relay = false}, \
+  {MSG_SUBARU_ANGLE_ES_HighBeamAssist, SUBARU_MAIN_BUS, 8, .check_relay = false}, \
+  {MSG_SUBARU_ANGLE_ES_STATIC_1,       SUBARU_MAIN_BUS, 8, .check_relay = false}, \
+  {MSG_SUBARU_ANGLE_ES_STATIC_2,       SUBARU_MAIN_BUS, 8, .check_relay = false}, \
 
 #define SUBARU_COMMON_RX_CHECKS(alt_bus)                                                                                                         \
   {.msg = {{MSG_SUBARU_Throttle,        SUBARU_MAIN_BUS, 8, 100U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}}, \
@@ -284,7 +297,7 @@ static safety_config subaru_init(uint16_t param) {
     SUBARU_BASE_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS_ANGLE) // lat
     SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS)
     SUBARU_COMMON_LONG_TX_MSGS(SUBARU_ALT_BUS) // long
-    SUBARU_GEN2_LONG_ADDITIONAL_TX_MSGS()
+    SUBARU_ANGLE_LKAS_LONG_ADDITIONAL_TX_MSGS()
   };
 
   static RxCheck subaru_rx_checks[] = {
