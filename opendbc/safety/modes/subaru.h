@@ -74,6 +74,8 @@
 
 #define SUBARU_ANGLE_LKAS_LONG_ADDITIONAL_TX_MSGS() \
   {MSG_SUBARU_ES_UDS_Request,          SUBARU_CAM_BUS,  8, .check_relay = false}, \
+  {MSG_SUBARU_ES_UDS_Request,          SUBARU_MAIN_BUS, 8, .check_relay = false}, \
+  {MSG_SUBARU_ES_UDS_Request,          SUBARU_ALT_BUS,  8, .check_relay = false}, \
   {MSG_SUBARU_ANGLE_ES_HighBeamAssist, SUBARU_MAIN_BUS, 8, .check_relay = false}, \
   {MSG_SUBARU_ANGLE_ES_STATIC_1,       SUBARU_MAIN_BUS, 8, .check_relay = false}, \
   {MSG_SUBARU_ANGLE_ES_STATIC_2,       SUBARU_MAIN_BUS, 8, .check_relay = false}, \
@@ -295,7 +297,7 @@ static safety_config subaru_init(uint16_t param) {
 
   static const CanMsg SUBARU_LKAS_ANGLE_LONG_TX_MSGS[] = {
     SUBARU_BASE_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS_ANGLE) // lat
-    SUBARU_COMMON_LONG_TX_MSGS(SUBARU_MAIN_BUS) // long
+    SUBARU_COMMON_LONG_TX_MSGS(SUBARU_ALT_BUS) // long
     SUBARU_ANGLE_LKAS_LONG_ADDITIONAL_TX_MSGS()
   };
 

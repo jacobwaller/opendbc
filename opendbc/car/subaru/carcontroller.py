@@ -122,13 +122,15 @@ class CarController(CarControllerBase):
 
       if self.CP.openpilotLongitudinalControl:
         if self.frame % 5 == 0:
-          can_sends.append(subarucan.create_es_status(self.packer, self.frame // 5, CS.es_status_msg,
+          bus = 1 if (self.CP.flags & SubaruFlags.LKAS_ANGLE != 0) else 0
+
+          can_sends.append(subarucan.create_es_status(self.packer, self.frame // 5, CS.es_status_msg, bus,
                                                       self.CP.openpilotLongitudinalControl, CC.longActive, cruise_rpm))
 
-          can_sends.append(subarucan.create_es_brake(self.packer, self.frame // 5, CS.es_brake_msg,
+          can_sends.append(subarucan.create_es_brake(self.packer, self.frame // 5, CS.es_brake_msg, bus,
                                                      self.CP.openpilotLongitudinalControl, CC.longActive, cruise_brake))
 
-          can_sends.append(subarucan.create_es_distance(self.packer, self.frame // 5, CS.es_distance_msg, 0, pcm_cancel_cmd,
+          can_sends.append(subarucan.create_es_distance(self.packer, self.frame // 5, CS.es_distance_msg, bus, pcm_cancel_cmd,
                                                         self.CP.openpilotLongitudinalControl, cruise_brake > 0, cruise_throttle))
       else:
         if pcm_cancel_cmd:
@@ -140,6 +142,8 @@ class CarController(CarControllerBase):
         # Tester present (keeps eyesight disabled)
         if self.frame % 100 == 0:
           can_sends.append(make_tester_present_msg(GLOBAL_ES_ADDR, CanBus.camera, suppress_response=True))
+          can_sends.append(make_tester_present_msg(GLOBAL_ES_ADDR, CanBus.alt, suppress_response=True))
+          can_sends.append(make_tester_present_msg(GLOBAL_ES_ADDR, CanBus.main, suppress_response=True))
 
         # Create all of the other eyesight messages to keep the rest of the car happy when eyesight is disabled
         if self.frame % 5 == 0:
