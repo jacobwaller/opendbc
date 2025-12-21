@@ -142,8 +142,6 @@ class CarController(CarControllerBase):
         # Tester present (keeps eyesight disabled)
         if self.frame % 100 == 0:
           can_sends.append(make_tester_present_msg(GLOBAL_ES_ADDR, CanBus.camera, suppress_response=True))
-          can_sends.append(make_tester_present_msg(GLOBAL_ES_ADDR, CanBus.alt, suppress_response=True))
-          can_sends.append(make_tester_present_msg(GLOBAL_ES_ADDR, CanBus.main, suppress_response=True))
 
         # Create all of the other eyesight messages to keep the rest of the car happy when eyesight is disabled
         if self.frame % 5 == 0:

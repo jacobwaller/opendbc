@@ -74,8 +74,6 @@
 
 #define SUBARU_ANGLE_LKAS_LONG_ADDITIONAL_TX_MSGS() \
   {MSG_SUBARU_ES_UDS_Request,          SUBARU_CAM_BUS,  8, .check_relay = false}, \
-  {MSG_SUBARU_ES_UDS_Request,          SUBARU_MAIN_BUS, 8, .check_relay = false}, \
-  {MSG_SUBARU_ES_UDS_Request,          SUBARU_ALT_BUS,  8, .check_relay = false}, \
   {MSG_SUBARU_ANGLE_ES_HighBeamAssist, SUBARU_MAIN_BUS, 8, .check_relay = false}, \
   {MSG_SUBARU_ANGLE_ES_STATIC_1,       SUBARU_MAIN_BUS, 8, .check_relay = false}, \
   {MSG_SUBARU_ANGLE_ES_STATIC_2,       SUBARU_MAIN_BUS, 8, .check_relay = false}, \
@@ -254,7 +252,7 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 
   if (msg->addr == MSG_SUBARU_ES_UDS_Request) {
     // tester present ('\x02\x3E\x80\x00\x00\x00\x00\x00') is allowed for gen2 longitudinal to keep eyesight disabled
-    bool is_tester_present = (GET_BYTES(msg, 0, 4) == 0x00803E02U) && (GET_BYTES(msg, 4, 4) == 0x0U);
+    bool is_tester_present = (GET_BYTES(msg, 0, 2) == 0x3E02U);
 
     // reading ES button data by identifier (b'\x03\x22\x11\x30\x00\x00\x00\x00') is also allowed (DID 0x1130)
     bool is_button_rdbi = (GET_BYTES(msg, 0, 4) == 0x30112203U) && (GET_BYTES(msg, 4, 4) == 0x0U);
