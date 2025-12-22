@@ -122,15 +122,15 @@ class CarController(CarControllerBase):
 
       if self.CP.openpilotLongitudinalControl:
         if self.frame % 5 == 0:
-          bus = 1 if (self.CP.flags & SubaruFlags.LKAS_ANGLE != 0) else 0
+          l_bus = CanBus.alt if (self.CP.flags & SubaruFlags.LKAS_ANGLE != 0) else CanBus.main
 
-          can_sends.append(subarucan.create_es_status(self.packer, self.frame // 5, CS.es_status_msg, bus,
+          can_sends.append(subarucan.create_es_status(self.packer, self.frame // 5, CS.es_status_msg, l_bus,
                                                       self.CP.openpilotLongitudinalControl, CC.longActive, cruise_rpm))
 
-          can_sends.append(subarucan.create_es_brake(self.packer, self.frame // 5, CS.es_brake_msg, bus,
+          can_sends.append(subarucan.create_es_brake(self.packer, self.frame // 5, CS.es_brake_msg, l_bus,
                                                      self.CP.openpilotLongitudinalControl, CC.longActive, cruise_brake))
 
-          can_sends.append(subarucan.create_es_distance(self.packer, self.frame // 5, CS.es_distance_msg, bus, pcm_cancel_cmd,
+          can_sends.append(subarucan.create_es_distance(self.packer, self.frame // 5, CS.es_distance_msg, l_bus, pcm_cancel_cmd,
                                                         self.CP.openpilotLongitudinalControl, cruise_brake > 0, cruise_throttle))
       else:
         if pcm_cancel_cmd:
