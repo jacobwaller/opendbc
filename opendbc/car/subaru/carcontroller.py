@@ -10,6 +10,8 @@ from opendbc.car.subaru.values import DBC, GLOBAL_ES_ADDR, CanBus, CarController
 # involves the total steering angle change rather than rate, but these limits work well for now
 MAX_STEER_RATE = 25  # deg/s
 MAX_STEER_RATE_FRAMES = 7  # tx control frames needed before torque can be cut
+ANGLE_STARTUP_STRICT_FRAMES = 20
+ANGLE_STARTUP_RATE_MARGIN = 0.1  # deg per control frame
 
 
 class CarController(CarControllerBase):
@@ -17,6 +19,8 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.apply_torque_last = 0
     self.apply_angle_last = 0
+    self.lat_active_prev = False
+    self.angle_startup_frames = 0
 
     self.cruise_button_prev = 0
     self.steer_rate_counter = 0
@@ -34,9 +38,24 @@ class CarController(CarControllerBase):
           self.p.ANGLE_LIMITS
         )
 
+    if CC.latActive and not self.lat_active_prev:
+      self.angle_startup_frames = ANGLE_STARTUP_STRICT_FRAMES
+
+    if CC.latActive and self.angle_startup_frames > 0:
+      # Match panda's safety speed fudge at engage to avoid startup command rejections.
+      speed_fudged = max(0., CS.out.vEgoRaw - 1.)
+      up_rate = np.interp(speed_fudged, self.p.ANGLE_LIMITS.ANGLE_RATE_LIMIT_UP[0], self.p.ANGLE_LIMITS.ANGLE_RATE_LIMIT_UP[1])
+      down_rate = np.interp(speed_fudged, self.p.ANGLE_LIMITS.ANGLE_RATE_LIMIT_DOWN[0], self.p.ANGLE_LIMITS.ANGLE_RATE_LIMIT_DOWN[1])
+      up_rate = max(0.05, up_rate - ANGLE_STARTUP_RATE_MARGIN)
+      down_rate = max(0.05, down_rate - ANGLE_STARTUP_RATE_MARGIN)
+      apply_steer = float(np.clip(apply_steer, self.apply_angle_last - down_rate, self.apply_angle_last + up_rate))
+      self.angle_startup_frames -= 1
+
     if not CC.latActive:
       apply_steer = CS.out.steeringAngleDeg
+      self.angle_startup_frames = 0
 
+    self.lat_active_prev = CC.latActive
     self.apply_angle_last = apply_steer
     return subarucan.create_steering_control_angle(self.packer, apply_steer, CC.latActive)
 
