@@ -16,9 +16,17 @@ MAX_STEER_RATE_FRAMES = 7  # tx control frames needed before torque can be cut
 
 
 def get_safety_CP():
-  # Use the Ascent for lateral limiting to match safety (most restrictive slip factor)
+  # Lateral limiting must match safety, so use the most restrictive angle LKAS car.
+  # Manufacturer steer ratio and wheelbase:
+  #   Crosstrek 2024+, Impreza 2024+: 13.0, 2.67 m
+  #   Forester 2022+:                 13.5, 2.67 m (Wilderness 2.66 m)
+  #   Outback 2023+:                  13.5, 2.75 m
+  #   Ascent 2023+:                   13.5, 2.89 m
+  # Most restrictive would be the Crosstrek -
   from opendbc.car.subaru.interface import CarInterface
-  return CarInterface.get_non_essential_params(CAR.SUBARU_ASCENT)
+  CP = CarInterface.get_non_essential_params(CAR.SUBARU_CROSSTREK_2025)
+  CP.steerRatio = 13.0
+  return CP
 
 
 class CarController(CarControllerBase):

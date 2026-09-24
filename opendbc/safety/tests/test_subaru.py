@@ -205,7 +205,7 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
   def test_controller_angle_continuity(self):
     platform = CAR.SUBARU_CROSSTREK_2025 if self.FLAGS & SubaruSafetyFlags.GEN2 else CAR.SUBARU_FORESTER_2022
     # Engagement above the nominal bound, and a speed increase that lowers the bound.
-    for start_speed, end_speed, measured, desired in ((13.24, 13.24, 57.61, 51.60), (13.0, 13.5, 52.2, 52.2)):
+    for start_speed, end_speed, measured, desired in ((13.24, 13.24, 51.59, 46.21), (13.0, 13.5, 46.75, 46.75)):
       for sign in (-1, 1):
         with self.subTest(sign=sign, start_speed=start_speed, end_speed=end_speed):
           self.setUp()

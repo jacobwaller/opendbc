@@ -145,17 +145,18 @@ static bool subaru_tx_hook(const CANPacket_t *msg) {
 
   // angle steer cmd checks
   if (msg->addr == MSG_SUBARU_ES_LKAS_ANGLE) {
-    // Based on SUBARU_ASCENT (most restrictive slip factor)
     const AngleSteeringLimits SUBARU_ANGLE_STEERING_LIMITS = {
       .max_angle = 190 * 100,
       .angle_deg_to_can = 100.,
       .frequency = 50U,
     };
 
+    // NOTE: based off the Crosstrek 2024-2026
+    // referenced also at get_safety_CP() in carcontroller.py
     const AngleSteeringParams SUBARU_STEERING_PARAMS = {
-      .slip_factor = -0.000580374471400815,
-      .steer_ratio = 13.5,
-      .wheelbase = 2.89,
+      .slip_factor = -0.0006281955319491566,  // calc_slip_factor(VM)
+      .steer_ratio = 13.0,
+      .wheelbase = 2.67,
     };
 
     int desired_angle = GET_BYTES_LE(msg, 5, 3) & 0x1FFFFU;
